@@ -400,6 +400,70 @@ class StudentRecordsIntegrationTest {
         .andExpect(jsonPath("$[0].kind").value("STUDENT"));
   }
 
+  @Test
+  void shouldResolveAProfessorDirectoryProfileWithContactAndCurrentCourses() throws Exception {
+    mockMvc
+        .perform(
+            as(
+                ANA,
+                "STUDENT",
+                "S-1001",
+                get("/api/core/directory/PROF-4"),
+                "directory-profile-professor"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.reference").value("PROF-4"))
+        .andExpect(jsonPath("$.kind").value("PROFESSOR"))
+        .andExpect(jsonPath("$.displayName").value("Dra. Lucía Fernández"))
+        .andExpect(jsonPath("$.email").value("lucia.fernandez@icesi.edu.co"))
+        .andExpect(jsonPath("$.headline").value("Psychology"))
+        // Only the newest term's courses, and both of hers in it.
+        .andExpect(jsonPath("$.detail", Matchers.containsString("Psicopatología")))
+        .andExpect(jsonPath("$.detail", Matchers.containsString("Psicología Clínica")));
+
+    assertThat(single())
+        .containsEntry("action", "READ_DIRECTORY_PROFILE")
+        .containsEntry("subject_type", "DIRECTORY_ENTRY")
+        .containsEntry("subject_id", "PROF-4")
+        .containsEntry("outcome", "ALLOWED");
+  }
+
+  @Test
+  void shouldResolveAStudentDirectoryProfileWithProgramAndSemester() throws Exception {
+    mockMvc
+        .perform(
+            as(
+                ANA,
+                "STUDENT",
+                "S-1001",
+                get("/api/core/directory/S-1003"),
+                "directory-profile-student"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.reference").value("S-1003"))
+        .andExpect(jsonPath("$.kind").value("STUDENT"))
+        .andExpect(jsonPath("$.displayName").value("María Rojas"))
+        .andExpect(jsonPath("$.email").value("maria.rojas@u.icesi.edu.co"))
+        .andExpect(jsonPath("$.headline").value("Psychology"))
+        .andExpect(jsonPath("$.detail").value("7.º semestre"));
+  }
+
+  @Test
+  void shouldReturn404ForADirectoryReferenceThatNamesNobody() throws Exception {
+    mockMvc
+        .perform(as(ANA, "STUDENT", "S-1001", get("/api/core/directory/S-9999"), "directory-404"))
+        .andExpect(status().isNotFound())
+        .andExpect(jsonPath("$.title").value("Not found"));
+    // A malformed professor id names nothing either, rather than blowing up as a 500.
+    mockMvc
+        .perform(
+            as(
+                ANA,
+                "STUDENT",
+                "S-1001",
+                get("/api/core/directory/PROF-xy"),
+                "directory-404-malformed"))
+        .andExpect(status().isNotFound());
+  }
+
   private MockHttpServletRequestBuilder as(
       UUID userId,
       String role,

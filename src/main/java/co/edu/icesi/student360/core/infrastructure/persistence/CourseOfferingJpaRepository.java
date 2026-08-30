@@ -12,4 +12,7 @@ public interface CourseOfferingJpaRepository
   @Override
   List<CourseOffering> findByTermAndCourseCodeInOrderByCourseCode(
       String term, Collection<String> courseCodes);
+
+  @Override
+  List<CourseOffering> findByProfessorIdOrderByTermDescCourseCodeAsc(Long professorId);
 }
