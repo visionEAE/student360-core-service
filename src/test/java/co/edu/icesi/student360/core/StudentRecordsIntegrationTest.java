@@ -284,6 +284,64 @@ class StudentRecordsIntegrationTest {
     assertThat(jdbc.queryForList("SELECT * FROM audit.audit_record")).isEmpty();
   }
 
+  @Test
+  void shouldReturnOwnCurrentProfessorsAndAuditWithSelfBasis() throws Exception {
+    mockMvc
+        .perform(
+            as(
+                ANA,
+                "STUDENT",
+                "S-1003",
+                get("/api/core/students/S-1003/current-professors"),
+                "gate-network-self"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$[0].courseCode").value("EST-201"))
+        .andExpect(jsonPath("$[2].courseCode").value("PSI-301"))
+        .andExpect(jsonPath("$[2].professor.fullName").value("Dra. Lucía Fernández"))
+        .andExpect(jsonPath("$[2].professor.department").value("Psychology"));
+
+    assertThat(single())
+        .containsEntry("action", "READ_CURRENT_PROFESSORS")
+        .containsEntry("subject_id", "S-1003")
+        .containsEntry("authorization_basis", "SELF")
+        .containsEntry("outcome", "ALLOWED");
+  }
+
+  @Test
+  void shouldDenyAnotherStudentsCurrentProfessors() throws Exception {
+    mockMvc
+        .perform(
+            as(
+                ANA,
+                "STUDENT",
+                "S-1001",
+                get("/api/core/students/S-1003/current-professors"),
+                "gate-network-denied"))
+        .andExpect(status().isForbidden());
+
+    assertThat(single())
+        .containsEntry("action", "READ_CURRENT_PROFESSORS")
+        .containsEntry("outcome", "DENIED");
+  }
+
+  @Test
+  void shouldLetStaffReadAnyStudentsCurrentProfessors() throws Exception {
+    mockMvc
+        .perform(
+            as(
+                CARLOS,
+                "ADVISOR",
+                "A-2001",
+                get("/api/core/students/S-1003/current-professors"),
+                "gate-network-staff"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.length()").value(5));
+
+    assertThat(single())
+        .containsEntry("authorization_basis", "STAFF_ROLE")
+        .containsEntry("outcome", "ALLOWED");
+  }
+
   private MockHttpServletRequestBuilder as(
       UUID userId,
       String role,
