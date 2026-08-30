@@ -18,6 +18,10 @@ public class Student {
 
   @Id private String id;
 
+  /** The institutional student code shown to people; {@code id} stays the cross-service key. */
+  @Column(nullable = false, unique = true)
+  private String code;
+
   @Column(name = "first_name", nullable = false)
   private String firstName;
 
@@ -34,6 +38,9 @@ public class Student {
   @Column(name = "admission_term", nullable = false)
   private String admissionTerm;
 
+  @Column(name = "current_semester", nullable = false)
+  private int currentSemester;
+
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
   private StudentStatus status;
@@ -45,6 +52,10 @@ public class Student {
 
   public String getId() {
     return id;
+  }
+
+  public String getCode() {
+    return code;
   }
 
   public String getFirstName() {
@@ -71,7 +82,20 @@ public class Student {
     return admissionTerm;
   }
 
+  public int getCurrentSemester() {
+    return currentSemester;
+  }
+
   public StudentStatus getStatus() {
     return status;
+  }
+
+  /** Whether the student is enrolled this term, as the SIS reports it. */
+  public EnrollmentStatus enrollmentStatus() {
+    return switch (status) {
+      case ACTIVE -> EnrollmentStatus.ACTIVE;
+      case ON_LEAVE -> EnrollmentStatus.ON_LEAVE;
+      case WITHDRAWN -> EnrollmentStatus.INACTIVE;
+    };
   }
 }

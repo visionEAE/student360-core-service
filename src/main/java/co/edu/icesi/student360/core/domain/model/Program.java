@@ -24,6 +24,9 @@ public class Program {
   @Column(nullable = false)
   private String faculty;
 
+  @Column(name = "total_semesters", nullable = false)
+  private int totalSemesters;
+
   protected Program() {}
 
   public Integer getId() {
@@ -40,5 +43,9 @@ public class Program {
 
   public String getFaculty() {
     return faculty;
+  }
+
+  public int getTotalSemesters() {
+    return totalSemesters;
   }
 }
