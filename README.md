@@ -10,6 +10,12 @@ integration platform (declared assumptions 2 and 3 in `student360-infra/docs/con
 | `GET` | `/api/core/students/{id}` | `READ_STUDENT_PROFILE` |
 | `GET` | `/api/core/students/{id}/academic-status` | `READ_ACADEMIC_STATUS` |
 | `GET` | `/api/core/students/{id}/financial-status` | `READ_FINANCIAL_STATUS` |
+| `GET` | `/api/core/students/{id}/current-professors` | `READ_CURRENT_PROFESSORS` |
+
+Who currently teaches a student is a deterministic fact (`core.course_offering`, seeded from the
+courses in the current term's gradebook) — never rated, unlike the support-network graph in
+`network-service`; it exists to answer "which professors is this student closest to" by the
+simplest honest signal available: who is teaching them right now.
 
 Every `/api/**` call must carry a service token whose audience is `core-service` (the gateway
 mints it); the user identity arrives as `X-User-*` headers.
