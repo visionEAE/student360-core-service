@@ -1,0 +1,51 @@
+spring:
+  application:
+    name: core-service
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:student360}
+    username: ${CORE_DB_USER:core_user}
+    password: ${CORE_DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: validate            # Flyway owns the schema; Hibernate only checks it matches
+    properties:
+      hibernate:
+        default_schema: core
+  flyway:
+    schemas: core                   # this service migrates its own schema and nothing else
+    default-schema: core
+    locations: classpath:db/migration
+
+server:
+  port: ${PORT:8082}                # PORT is the Cloud Run contract
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+student360:
+  service-name: core-service        # also the audience every inbound service token must carry
+  security:
+    service-token:
+      secret: ${SERVICE_TOKEN_SECRET}
+      protected-paths: ["/api/**"]
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
