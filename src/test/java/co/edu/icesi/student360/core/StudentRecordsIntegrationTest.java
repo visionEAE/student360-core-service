@@ -342,6 +342,64 @@ class StudentRecordsIntegrationTest {
         .containsEntry("outcome", "ALLOWED");
   }
 
+  @Test
+  void shouldSearchStudentsAndProfessorsByNameForTheSupportNetworkPicker() throws Exception {
+    mockMvc
+        .perform(
+            as(
+                ANA,
+                "STUDENT",
+                "S-1001",
+                get("/api/core/directory/search")
+                    .param("q", "Fernández")
+                    .param("kind", "PROFESSOR"),
+                "directory-professor"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.length()").value(1))
+        .andExpect(jsonPath("$[0].kind").value("PROFESSOR"))
+        .andExpect(jsonPath("$[0].displayName").value("Dra. Lucía Fernández"))
+        .andExpect(jsonPath("$[0].reference", Matchers.startsWith("PROF-")));
+
+    mockMvc
+        .perform(
+            as(
+                ANA,
+                "STUDENT",
+                "S-1001",
+                get("/api/core/directory/search").param("q", "rojas").param("kind", "STUDENT"),
+                "directory-student"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.length()").value(1))
+        .andExpect(jsonPath("$[0].kind").value("STUDENT"))
+        .andExpect(jsonPath("$[0].reference").value("S-1003"))
+        .andExpect(jsonPath("$[0].displayName").value("María Rojas"));
+
+    // Below the two-character minimum: an empty query text is never a real search.
+    mockMvc
+        .perform(
+            as(
+                ANA,
+                "STUDENT",
+                "S-1001",
+                get("/api/core/directory/search").param("q", "a"),
+                "directory-too-short"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$").isEmpty());
+
+    // No kind → searches both directories at once.
+    mockMvc
+        .perform(
+            as(
+                ANA,
+                "STUDENT",
+                "S-1001",
+                get("/api/core/directory/search").param("q", "rojas"),
+                "directory-both"))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.length()").value(1))
+        .andExpect(jsonPath("$[0].kind").value("STUDENT"));
+  }
+
   private MockHttpServletRequestBuilder as(
       UUID userId,
       String role,

@@ -10,4 +10,8 @@ public interface StudentRepository {
   Optional<Student> findById(String id);
 
   List<Student> findByIdIn(Collection<String> ids);
+
+  List<Student>
+      findTop10ByFirstNameContainingIgnoreCaseOrLastNameContainingIgnoreCaseOrderByLastName(
+          String firstName, String lastName);
 }
