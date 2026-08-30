@@ -25,6 +25,9 @@ public class Enrollment {
   @Column(nullable = false)
   private String term;
 
+  @Column(name = "semester_number")
+  private Integer semesterNumber;
+
   @Column(name = "credits_enrolled", nullable = false)
   private int creditsEnrolled;
 
@@ -49,6 +52,14 @@ public class Enrollment {
 
   public String getTerm() {
     return term;
+  }
+
+  public Integer getSemesterNumber() {
+    return semesterNumber;
+  }
+
+  public boolean isGraded() {
+    return termGpa != null;
   }
 
   public int getCreditsEnrolled() {

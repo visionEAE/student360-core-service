@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 
 /** The ERP's view of a student's account: the most sensitive data this service owns. */
 @Entity
@@ -30,11 +31,22 @@ public class FinancialStatus {
   @Column(name = "days_overdue", nullable = false)
   private int daysOverdue;
 
-  @Column(name = "payment_plan", nullable = false)
-  private boolean paymentPlan;
-
   @Column(name = "financial_hold", nullable = false)
   private boolean financialHold;
+
+  @Column(name = "tuition_amount", nullable = false)
+  private BigDecimal tuitionAmount;
+
+  @Column(name = "paid_amount", nullable = false)
+  private BigDecimal paidAmount;
+
+  @Column(name = "due_date")
+  private LocalDate dueDate;
+
+  @Column(name = "payment_plan")
+  private String paymentPlan;
+
+  @Column private String scholarship;
 
   @Column(name = "updated_at", nullable = false)
   private Instant updatedAt;
@@ -57,8 +69,25 @@ public class FinancialStatus {
     return daysOverdue;
   }
 
-  public boolean hasPaymentPlan() {
+  public BigDecimal getTuitionAmount() {
+    return tuitionAmount;
+  }
+
+  public BigDecimal getPaidAmount() {
+    return paidAmount;
+  }
+
+  public LocalDate getDueDate() {
+    return dueDate;
+  }
+
+  /** Short description of the active plan, or null when none. */
+  public String getPaymentPlanDescription() {
     return paymentPlan;
+  }
+
+  public String getScholarship() {
+    return scholarship;
   }
 
   public boolean hasFinancialHold() {
