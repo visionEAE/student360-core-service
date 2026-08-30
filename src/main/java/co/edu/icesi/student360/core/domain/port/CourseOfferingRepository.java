@@ -8,4 +8,7 @@ public interface CourseOfferingRepository {
 
   List<CourseOffering> findByTermAndCourseCodeInOrderByCourseCode(
       String term, Collection<String> courseCodes);
+
+  /** Most recent term first, so a caller can take just what the professor teaches right now. */
+  List<CourseOffering> findByProfessorIdOrderByTermDescCourseCodeAsc(Long professorId);
 }
